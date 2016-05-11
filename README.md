@@ -1,0 +1,2 @@
+# JSP2Flask
+在如皋JSP实训的期间将JSP要做的东西用Flask实现了一遍
