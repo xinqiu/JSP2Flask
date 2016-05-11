@@ -1,0 +1,17 @@
+<form method="post">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }}
+    {{ form.name }}
+    <br>
+    {{ form.passwd.label }}
+    {{ form.passwd }}
+    <br>
+    {% for subfield in form.gender %}
+    <tr>
+        <td>{{ subfield }}</td>
+        <td>{{ subfield.label }}</td>
+    </tr>
+    {% endfor %}
+    <br>
+    {{ form.submit() }}
+</form>
