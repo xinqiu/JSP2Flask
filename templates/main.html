@@ -1,0 +1,8 @@
+{% include "bootstrap/base.html" %}
+{% if current_user.is_authenticated %}
+    {{ current_user.name }}
+    <br>
+    <a href="{{ url_for('logout') }}">Logout</a>
+{% else %}
+    Stranger
+{% endif %}

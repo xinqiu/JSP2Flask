@@ -1,7 +1,7 @@
 from flask import Flask, render_template, session, redirect, url_for, make_response, request
 from flask.ext.wtf import Form
 from flask.ext.bootstrap import Bootstrap
-from flask.ext.login import LoginManager, login_required, login_user, logout_user
+from flask.ext.login import LoginManager, login_required, login_user, logout_user, UserMixin
 from wtforms import StringField, PasswordField, SubmitField, RadioField
 
 app = Flask(__name__)
@@ -23,6 +23,16 @@ class NameForm(Form):
     gender = RadioField('gender', choices=[('M', 'Male'), ('F', 'Female')])
     submit = SubmitField('Submit')
 
+class User(UserMixin):
+    def __init__(self, name):
+        self.name = name
+
+    def get_id(self):
+        return self.name
+
+@login_manager.user_loader
+def load_user(name):
+    return User(name=name)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -55,23 +65,25 @@ def getSession():
         return session['username'] + '<br>' + session['password']
     return render_template('session.html', form=form)
 
-@login_manager.user_loader
-def login_user(username):
-    return username
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        login_user(form.username.data)
-        return '<h1>'+form.username.data+'</h1>'
+        user = load_user(form.username.data)
+        login_user(user)
+        return redirect(url_for('main'))
     return render_template('login.html', form=form)
+
+@app.route('/main')
+def main():
+    return render_template('main.html')
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return '<h1>Logout</h1>'
+    return redirect(url_for('main'))
 
 if __name__ == '__main__':
     app.run(debug=True)
