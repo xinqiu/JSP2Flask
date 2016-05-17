@@ -12,6 +12,8 @@ bootstrap.init_app(app)
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'Flask2JSP'
 
+dic = {'count': 0}
+
 class LoginForm(Form):
     username = StringField('Username')
     password = PasswordField('Password')
@@ -36,13 +38,14 @@ def load_user(name):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    dic['count'] += 1
     form = NameForm()
     if form.validate_on_submit():
         session['name'] = form.name.data
         session['password'] = form.passwd.data
         session['gender'] = form.gender.data
         return redirect(url_for('.info'))
-    return render_template('index.html', form=form)
+    return render_template('index.html', form=form, dic=dic)
 
 @app.route('/info')
 def info():
