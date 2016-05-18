@@ -1,8 +1,11 @@
-from flask import Flask, render_template, session, redirect, url_for, make_response, request
+from flask import Flask, render_template, session, redirect, url_for, \
+    make_response, request
 from flask.ext.wtf import Form
 from flask.ext.bootstrap import Bootstrap
-from flask.ext.login import LoginManager, login_required, login_user, logout_user, UserMixin
+from flask.ext.login import LoginManager, login_required, login_user, \
+    logout_user, UserMixin
 from wtforms import StringField, PasswordField, SubmitField, RadioField
+from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 bootstrap = Bootstrap()
@@ -49,7 +52,8 @@ def index():
 
 @app.route('/info')
 def info():
-    return render_template('info.html', name=session.get('name'), passwd=session.get('password'), gender=session.get('gender'))
+    return render_template('info.html', name=session.get('name'), passwd=
+    session.get('password'), gender=session.get('gender'))
 
 @app.route('/make_cookie')
 def makeCookie():
@@ -82,6 +86,15 @@ def login():
 def main():
     return render_template('main.html')
 
+@app.template_filter('reverse')
+def reverse_filter(s):
+    return s[::-1]
+
+@app.route('/lists')
+def lists():
+    s = range(10)
+    return render_template('lists.html', mylist=s)
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -90,4 +103,5 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
