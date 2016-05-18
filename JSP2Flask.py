@@ -6,14 +6,20 @@ from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, UserMixin
 from wtforms import StringField, PasswordField, SubmitField, RadioField
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.script import Manager
 
 app = Flask(__name__)
+manager = Manager(app)
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 login_manager.session_protection = 'basic'
 bootstrap.init_app(app)
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'Flask2JSP'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@115.159.96.43/jsp2flask'
+app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+db = SQLAlchemy(app)
 
 dic = {'count': 0}
 
@@ -28,12 +34,18 @@ class NameForm(Form):
     gender = RadioField('gender', choices=[('M', 'Male'), ('F', 'Female')])
     submit = SubmitField('Submit')
 
-class User(UserMixin):
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
     def __init__(self, name):
         self.name = name
 
     def get_id(self):
         return self.name
+
+    def __repr__(self):
+        return '<User %s>' % self.name
 
 @login_manager.user_loader
 def load_user(name):
@@ -102,6 +114,7 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # db.create_all()
+    manager.run()
 
 
