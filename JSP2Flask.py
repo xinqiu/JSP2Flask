@@ -16,6 +16,7 @@ login_manager.session_protection = 'basic'
 bootstrap.init_app(app)
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'Flask2JSP'
+#此处密码应该保存在环境变量中,这样更安全
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@115.159.96.43/jsp2flask'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
