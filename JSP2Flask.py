@@ -1,5 +1,7 @@
+# coding=utf-8
+import os
 from flask import Flask, render_template, session, redirect, url_for, \
-    make_response, request
+    make_response, request, flash
 from flask.ext.wtf import Form
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.login import LoginManager, login_required, login_user, \
@@ -7,6 +9,8 @@ from flask.ext.login import LoginManager, login_required, login_user, \
 from wtforms import StringField, PasswordField, SubmitField, RadioField
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 manager = Manager(app)
@@ -17,7 +21,8 @@ bootstrap.init_app(app)
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'Flask2JSP'
 #此处密码应该保存在环境变量中,这样更安全
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@115.159.96.43/jsp2flask'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@115.159.96.43/jsp2flask'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
@@ -27,7 +32,7 @@ dic = {'count': 0}
 class LoginForm(Form):
     username = StringField('Username')
     password = PasswordField('Password')
-    submit = SubmitField('Submit')
+    submit = SubmitField('Login')
 
 class NameForm(Form):
     name = StringField('Username')
@@ -39,8 +44,11 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    def __init__(self, name):
+    password = db.Column(db.String(64))
+
+    def __init__(self, name, password=None):
         self.name = name
+        self.password = password
 
     def get_id(self):
         return self.name
@@ -89,11 +97,20 @@ def getSession():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    if form.validate_on_submit():
-        user = load_user(form.username.data)
-        login_user(user)
-        return redirect(url_for('main'))
+
+    if form.validate_on_submit() and form.password.data != '':
+        username = form.username.data
+        password = form.password.data
+        userInfo = User(name=form.username.data, password=form.password.data)
+        user = User.query.filter_by(name=username).first()
+        if user.name == username and user.password == password:
+            login_user(load_user(form.username.data))
+            return redirect(url_for('main'))
+        else:
+            flash('Wrong password!')
+            redirect(url_for('login'))
     return render_template('login.html', form=form)
+
 
 @app.route('/main')
 def main():
@@ -115,7 +132,8 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    # db.create_all()
+    if not os.path.exists('db.sqlite'):
+        db.create_all()
     manager.run()
 
 
