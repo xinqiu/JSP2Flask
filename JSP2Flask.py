@@ -131,6 +131,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+
 if __name__ == '__main__':
     if not os.path.exists('db.sqlite'):
         db.create_all()

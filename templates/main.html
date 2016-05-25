@@ -1,8 +1,37 @@
-{% include "bootstrap/base.html" %}
-{% if current_user.is_authenticated %}
-    {{ current_user.name }}
-    <br>
-    <a href="{{ url_for('logout') }}">Logout</a>
-{% else %}
-    Stranger
-{% endif %}
+{% extends "bootstrap/base.html" %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Manage System</title>
+</head>
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle"
+                    data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('main') }}">Manage System</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+    <div class="col-sm-12 controls">
+        {% if current_user.is_authenticated %}
+            <h1>{{ current_user.name }}</h1>
+            <br>
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Logout</a>
+        {% else %}
+            Stranger
+        {% endif %}
+    </div>
+    </div>
+{% endblock %}
